@@ -23,6 +23,13 @@ public class Main {
             choice = input.nextInt();
 
             switch (choice) {
+                case 00:
+                    System.out.println("Entrez l'ISBN du livre à emprunter :");
+                    String isbnToBorrow = input.next();
+                    input.nextLine();
+
+                     book.borrowBookByISBN(isbnToBorrow);
+                    break;
 
                  case 1:
                     book.addBook();
@@ -44,7 +51,7 @@ public class Main {
                      switch (searchChoice){
                          case 1:
                              System.out.println("Entrez l'ISBN du livre à rechercher :");
-                             int isbnToSearch = input.nextInt();
+                             String isbnToSearch = input.next();
                              Book foundBook = book.searchBookByISBN(isbnToSearch);
                              if (foundBook != null) {
                                  System.out.println("Livre trouvé :");
@@ -95,6 +102,7 @@ public class Main {
                                  System.out.println("Livre non trouvé.");
                              }
                              break;
+
                      }
                      break;
 
@@ -112,6 +120,23 @@ public class Main {
 
                  case 7:
                      //book.showAllBorrowedBooks();
+                case 8:
+                    System.out.println("Entrez l'ISBN du livre à supprimer :");
+                    String isbnToDelete = input.next();
+
+                    // Use the deleteBookByISBN method to delete the book based on ISBN
+                    book.deleteBookByISBN(isbnToDelete);
+                case 9:
+                    System.out.println("Entrez l'ISBN du livre à modifier :");
+                    String isbnToUpdate = input.next();
+                    // Call the method to update book information based on ISBN
+                    book.updateBookInformationByISBN(isbnToUpdate);
+                    break;
+                case 10:
+                    System.out.println("Entrez l'ISBN du livre à retourner :");
+                    String isbnToReturn = input.next();
+                    book.returnBookByISBN(isbnToReturn);
+                    break;
 
                 default:
 

@@ -17,8 +17,7 @@ public class Emprunteur {
 
         System.out.println("Signup successful!");
 
-        // Close the scanner if you don't need it elsewhere
-        input.close();
+         input.close();
 
         String jdbcUrl = "jdbc:mysql://localhost:3306/librarymanager";
         String username = "root";
@@ -27,8 +26,7 @@ public class Emprunteur {
         try {
             Connection connection = DriverManager.getConnection(jdbcUrl, username, password);
 
-            // SQL query to insert Emprunteur into the table
-            String insertQuery = "INSERT INTO emprunteur (emprunteur_id, numero_membre, motdepasse) VALUES (?, ?, ?)";
+             String insertQuery = "INSERT INTO emprunteur (emprunteur_id, numero_membre, motdepasse) VALUES (?, ?, ?)";
             PreparedStatement preparedStatement = connection.prepareStatement(insertQuery);
 
             preparedStatement.setInt(1, this.emprunteur_id);
@@ -47,6 +45,7 @@ public class Emprunteur {
             e.printStackTrace();
         }
     }
+
 
     // Getters and setters for emprunteur_id, numero_membre, and motdepasse
     public int getEmprunteur_id() {
