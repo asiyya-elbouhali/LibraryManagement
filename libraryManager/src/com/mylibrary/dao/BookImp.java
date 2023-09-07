@@ -1,65 +1,52 @@
+package com.mylibrary.dao;
+
 import java.sql.*;
 import java.text.SimpleDateFormat;
-import java.util.Scanner;
 import java.util.Date;
+import java.util.Scanner;
 
-public class Book {
+import com.mylibrary.model.Book;
+import com.mylibrary.model.Emprunt;
+import com.mylibrary.model.Emprunteur;
+import com.mylibrary.db.DatabaseManager;
 
-    private int book_id;
-    private int isbn;
-    private String titre;
-    private String auteur;
-    private String etat;
-    public static int count;
-    Book theBooks[] = new Book[50];
-    private Scanner input = new Scanner(System.in);
-    public  static void  main(String args[])
-    {
-        Connection con;
-        PreparedStatement pst;
-        try {
-            Class.forName("com.mysql.cj.jdbc.Driver");
-            con = DriverManager.getConnection("jdbc:mysql://localhost:3306/librarymanager", "root", "");
-            System.out.println("Success");
-        }catch (ClassNotFoundException ex) {
-            ex.printStackTrace();
-        }catch (SQLException ex) {
-        ex.printStackTrace();
-        }
+public class BookImp implements BookDao {
+    private Book book;
 
+    public BookImp(Book book) {
+        this.book = book;
     }
 
-    public void addBook()
-    {
-
+    @Override
+    public void addBook() {
+        Scanner input = new Scanner(System.in); // Create a new Scanner for user input
         System.out.println("Entrez l'ISBN du livre:");
-        this.isbn = input.nextInt();
+        String isbn = input.next();
         input.nextLine();
 
         System.out.println("Entrez le titre du livre:");
-        this.titre = input.nextLine();
+        String titre = input.nextLine();
 
         System.out.println("Entez l'auteur du livre:");
-        this.auteur = input.nextLine();
+        String auteur = input.nextLine();
 
-        this.etat = "disponible";
+        book.setIsbn(isbn);
+        book.setTitre(titre);
+        book.setAuteur(auteur);
+        String etat = "disponible"; // Set the etat here or retrieve it from user input
 
-        String jdbcUrl = "jdbc:mysql://localhost:3306/librarymanager";
-        String username = "root";
-        String password = "";
-
+        // Use the database connection from the Book class
         try {
-            Connection connection = DriverManager.getConnection(jdbcUrl, username, password);
+            Connection connection = DatabaseManager.Connection();
 
-            // SQL query to insert Emprunteur into the table
-            String insertQuery = "INSERT INTO book (isbn, titre, auteur, etat) VALUES (?, ?, ?,?)";
+            // SQL query to insert a book into the table
+            String insertQuery = "INSERT INTO book (isbn, titre, auteur, etat) VALUES (?, ?, ?, ?)";
             PreparedStatement preparedStatement = connection.prepareStatement(insertQuery);
 
-            preparedStatement.setInt(1, this.isbn);
-            preparedStatement.setString(2, this.titre);
-            preparedStatement.setString(3, this.auteur);
-            preparedStatement.setString(4, this.etat);
-
+            preparedStatement.setString(1, isbn);
+            preparedStatement.setString(2, titre);
+            preparedStatement.setString(3, auteur);
+            preparedStatement.setString(4, etat);
 
             int rowsInserted = preparedStatement.executeUpdate();
             if (rowsInserted > 0) {
@@ -68,44 +55,39 @@ public class Book {
 
             // Close resources
             preparedStatement.close();
-            connection.close();
         } catch (SQLException e) {
             e.printStackTrace();
         }
-
     }
 
+    @Override
     public int searchBookIdByISBN(String isbnToSearch) {
-        String jdbcUrl = "jdbc:mysql://localhost:3306/librarymanager";
-        String username = "root";
-        String password = "";
-
         Connection connection = null;
         PreparedStatement preparedStatement = null;
         ResultSet resultSet = null;
-        int bookId = -1; // Initialize to -1 or an appropriate error value
+        int bookId = -1; // Initialisez à -1 ou une valeur d'erreur appropriée
 
         try {
-            // Establish the database connection
-            connection = DriverManager.getConnection(jdbcUrl, username, password);
+            // Établir la connexion à la base de données en utilisant DatabaseManager
+            connection = DatabaseManager.Connection();
 
-            // SQL query to retrieve book_id based on ISBN
+            // Requête SQL pour récupérer book_id basé sur ISBN
             String query = "SELECT book_id FROM book WHERE isbn = ?";
             preparedStatement = connection.prepareStatement(query);
             preparedStatement.setString(1, isbnToSearch);
 
-            // Execute the query
+            // Exécutez la requête
             resultSet = preparedStatement.executeQuery();
 
-            // Check if a result was found
+            // Vérifiez si un résultat a été trouvé
             if (resultSet.next()) {
                 bookId = resultSet.getInt("book_id");
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            e.printStackTrace(); // Gérez ou journalisez l'exception selon vos besoins
         } finally {
             try {
-                // Close resources
+                // Fermer les ressources
                 if (resultSet != null) {
                     resultSet.close();
                 }
@@ -116,27 +98,26 @@ public class Book {
                     connection.close();
                 }
             } catch (SQLException e) {
-                e.printStackTrace();
+                e.printStackTrace(); // Gérez ou journalisez l'exception selon vos besoins
             }
         }
 
         return bookId;
     }
-
+    @Override
     public void deleteBookByISBN(String isbnToDelete) {
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
         int bookIdToDelete = searchBookIdByISBN(isbnToDelete);
-
         if (bookIdToDelete != -1) {
-            String jdbcUrl = "jdbc:mysql://localhost:3306/librarymanager";
-            String username = "root";
-            String password = "";
+
 
             try {
-                Connection connection = DriverManager.getConnection(jdbcUrl, username, password);
+                connection = DatabaseManager.Connection();
 
                 // SQL query to delete a book by book_id
                 String deleteQuery = "DELETE FROM book WHERE book_id = ?";
-                PreparedStatement preparedStatement = connection.prepareStatement(deleteQuery);
+                preparedStatement = connection.prepareStatement(deleteQuery);
                 preparedStatement.setInt(1, bookIdToDelete);
 
                 int rowsDeleted = preparedStatement.executeUpdate();
@@ -156,18 +137,18 @@ public class Book {
             System.out.println("No book found with ISBN " + isbnToDelete + ".");
         }
     }
-
+    @Override
     public Book searchBookByISBN(String isbnToSearch) {
-        String jdbcUrl = "jdbc:mysql://localhost:3306/librarymanager";
-        String username = "root";
-        String password = "";
+
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
 
         try {
-            Connection connection = DriverManager.getConnection(jdbcUrl, username, password);
+            connection = DatabaseManager.Connection();
 
             // SQL query to select a book by ISBN
             String selectQuery = "SELECT * FROM book WHERE isbn = ?";
-            PreparedStatement preparedStatement = connection.prepareStatement(selectQuery);
+            preparedStatement = connection.prepareStatement(selectQuery);
 
             // Try to parse the input as an integer
             int parsedIsbn = -1;
@@ -182,7 +163,7 @@ public class Book {
             ResultSet resultSet = preparedStatement.executeQuery();
 
             if (resultSet.next()) {
-                int isbn = resultSet.getInt("isbn");
+                String isbn = resultSet.getString("isbn");
                 String titre = resultSet.getString("titre");
                 String auteur = resultSet.getString("auteur");
                 String etat = resultSet.getString("etat");
@@ -190,10 +171,10 @@ public class Book {
 
                 // Create a new Book object with the retrieved information
                 Book foundBook = new Book();
-                foundBook.isbn = isbn;
-                foundBook.titre = titre;
-                foundBook.auteur = auteur;
-                foundBook.etat = etat;
+                foundBook.setIsbn(isbn);
+                foundBook.setTitre(titre) ;
+                foundBook.setAuteur(auteur);
+                foundBook.setEtat(etat);
                 foundBook.setBook_id(bookId);
 
                 // Close resources
@@ -217,32 +198,32 @@ public class Book {
         return null;
     }
 
+    @Override
     public Book searchBookByTitle(String titleToSearch) {
-        String jdbcUrl = "jdbc:mysql://localhost:3306/librarymanager";
-        String username = "root";
-        String password = "";
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
 
         try {
-            Connection connection = DriverManager.getConnection(jdbcUrl, username, password);
+            connection = DatabaseManager.Connection();
 
-             String selectQuery = "SELECT * FROM book WHERE titre = ?";
-            PreparedStatement preparedStatement = connection.prepareStatement(selectQuery);
+            String selectQuery = "SELECT * FROM book WHERE titre = ?";
+            preparedStatement = connection.prepareStatement(selectQuery);
             preparedStatement.setString(1, titleToSearch);
 
             ResultSet resultSet = preparedStatement.executeQuery();
 
             if (resultSet.next()) {
-                int isbn = resultSet.getInt("isbn");
+                String isbn = resultSet.getString("isbn");
                 String titre = resultSet.getString("titre");
                 String auteur = resultSet.getString("auteur");
                 String etat = resultSet.getString("etat");
 
                 // Create a new Book object with the retrieved information
                 Book foundBook = new Book();
-                foundBook.isbn = isbn;
-                foundBook.titre = titre;
-                foundBook.auteur = auteur;
-                foundBook.etat = etat;
+                foundBook.setIsbn(isbn);
+                foundBook.setTitre(titre);
+                foundBook.setAuteur(auteur);
+                foundBook.setEtat(etat);
 
                 // Close resources
                 resultSet.close();
@@ -265,33 +246,33 @@ public class Book {
         return null;
     }
 
+    @Override
     public Book searchBookByAuthor(String authorToSearch) {
-        String jdbcUrl = "jdbc:mysql://localhost:3306/librarymanager";
-        String username = "root";
-        String password = "";
 
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
         try {
-            Connection connection = DriverManager.getConnection(jdbcUrl, username, password);
+            connection = DatabaseManager.Connection();
 
             // SQL query to select a book by ISBN
             String selectQuery = "SELECT * FROM book WHERE auteur = ?";
-            PreparedStatement preparedStatement = connection.prepareStatement(selectQuery);
+             preparedStatement = connection.prepareStatement(selectQuery);
             preparedStatement.setString(1, authorToSearch);
 
             ResultSet resultSet = preparedStatement.executeQuery();
 
             if (resultSet.next()) {
-                int isbn = resultSet.getInt("isbn");
+                String isbn = resultSet.getString("isbn");
                 String titre = resultSet.getString("titre");
                 String auteur = resultSet.getString("auteur");
                 String etat = resultSet.getString("etat");
 
                 // Create a new Book object with the retrieved information
                 Book foundBook = new Book();
-                foundBook.isbn = isbn;
-                foundBook.titre = titre;
-                foundBook.auteur = auteur;
-                foundBook.etat = etat;
+                foundBook.setIsbn(isbn);
+                foundBook.setTitre(titre);
+                foundBook.setAuteur(auteur);
+                foundBook.setEtat(etat);
 
                 // Close resources
                 resultSet.close();
@@ -314,62 +295,13 @@ public class Book {
         return null;
     }
 
-    public Book searchBookByStatus(String statusToSearch) {
-        String jdbcUrl = "jdbc:mysql://localhost:3306/librarymanager";
-        String username = "root";
-        String password = "";
-
-        try {
-            Connection connection = DriverManager.getConnection(jdbcUrl, username, password);
-
-            // SQL query to select a book by ISBN
-            String selectQuery = "SELECT * FROM book WHERE etat = ?";
-            PreparedStatement preparedStatement = connection.prepareStatement(selectQuery);
-            preparedStatement.setString(1, statusToSearch);
-
-            ResultSet resultSet = preparedStatement.executeQuery();
-
-            if (resultSet.next()) {
-                int isbn = resultSet.getInt("isbn");
-                String titre = resultSet.getString("titre");
-                String auteur = resultSet.getString("auteur");
-                String etat = resultSet.getString("etat");
-
-                // Create a new Book object with the retrieved information
-                Book foundBook = new Book();
-                foundBook.isbn = isbn;
-                foundBook.titre = titre;
-                foundBook.auteur = auteur;
-                foundBook.etat = etat;
-
-                // Close resources
-                resultSet.close();
-                preparedStatement.close();
-                connection.close();
-
-                return foundBook;
-            } else {
-                System.out.println("Il n'y a aucun livre " + statusToSearch );
-            }
-
-            // Close resources
-            resultSet.close();
-            preparedStatement.close();
-            connection.close();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        return null;
-    }
-
+    @Override
     public void showAllBooks() {
-        String jdbcUrl = "jdbc:mysql://localhost:3306/librarymanager";
-        String username = "root";
-        String password = "";
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
 
         try {
-            Connection connection = DriverManager.getConnection(jdbcUrl, username, password);
+            connection = DatabaseManager.Connection();
 
             // SQL query to select all books from the 'book' table
             String selectQuery = "SELECT * FROM book";
@@ -398,8 +330,7 @@ public class Book {
         }
     }
 
-
-    // To create menu
+    @Override
     public void Menu()
     {
 
@@ -423,8 +354,7 @@ public class Book {
                 "-------------------------------------------------------------------------------------------------------");
     }
 
-
-    // Borrow a book by ISBN
+    @Override
     public void borrowBookByISBN(String isbnToBorrow) {
         // Search for the book by ISBN
         Book foundBook = searchBookByISBN(isbnToBorrow);
@@ -444,10 +374,10 @@ public class Book {
 
                 // Set the date_emprunt and date_retour as needed
                 SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-                Date currentDate = new Date();
+                java.util.Date currentDate = new java.util.Date();
                 String dateEmprunt = dateFormat.format(currentDate);
                 // Calculate the return date (e.g., 2 weeks from today)
-                Date returnDate = new Date(currentDate.getTime() + (14 * 24 * 60 * 60 * 1000)); // 14 days
+                java.util.Date returnDate = new Date(currentDate.getTime() + (14 * 24 * 60 * 60 * 1000)); // 14 days
                 String dateRetour = dateFormat.format(returnDate);
                 emprunt.setDate_emprunt(dateEmprunt);
                 emprunt.setDate_retour(dateRetour);
@@ -497,17 +427,13 @@ public class Book {
             System.out.println("Aucun livre trouvé avec l'ISBN spécifié.");
         }
     }
+     private void updateBookStatusInDatabase(Book book) {
 
-    // Add this method to update the book's status in the database
-    private void updateBookStatusInDatabase(Book book) {
-        String jdbcUrl = "jdbc:mysql://localhost:3306/librarymanager";
-        String username = "root";
-        String password = "";
 
         Connection connection = null;
         try {
             // Establish the database connection
-            connection = DriverManager.getConnection(jdbcUrl, username, password);
+            connection = DatabaseManager.Connection();
 
             // Update the book's status
             String updateQuery = "UPDATE book SET etat = ? WHERE book_id = ?";
@@ -595,27 +521,8 @@ public class Book {
         }
     }
 
-    // Add this method to update the return date in the Emprunt object in the database
-    private void updateEmpruntReturnDateInDatabase(Emprunt emprunt, Connection connection) {
-        try {
-            // Update the return date in the Emprunt object
-            String updateQuery = "UPDATE emprunt SET date_retour = ? WHERE book_id = ? AND emprunteur_id = ?";
-            PreparedStatement preparedStatement = connection.prepareStatement(updateQuery);
-            preparedStatement.setString(1, emprunt.getDate_retour());
-            preparedStatement.setInt(2, emprunt.getBook_id());
-            preparedStatement.setInt(3, emprunt.getEmprunteur_id());
-
-            preparedStatement.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
-    // Add this method in your class or a dedicated database utility class
     public int lookupEmprunteurIdByNumeroMember(String numeroMember) {
-        String jdbcUrl = "jdbc:mysql://localhost:3306/librarymanager";
-        String username = "root";
-        String password = "";
+
 
         Connection connection = null;
         PreparedStatement preparedStatement = null;
@@ -624,7 +531,7 @@ public class Book {
 
         try {
             // Establish the database connection
-            connection = DriverManager.getConnection(jdbcUrl, username, password);
+            connection = DatabaseManager.Connection();
 
             // SQL query to retrieve emprunteur_id based on numero_member
             String query = "SELECT emprunteur_id FROM emprunteur WHERE numero_membre = ?";
@@ -660,6 +567,21 @@ public class Book {
         return emprunteurId;
     }
 
+    private void updateEmpruntReturnDateInDatabase(Emprunt emprunt, Connection connection) {
+        try {
+            // Update the return date in the Emprunt object
+            String updateQuery = "UPDATE emprunt SET date_retour = ? WHERE book_id = ? AND emprunteur_id = ?";
+            PreparedStatement preparedStatement = connection.prepareStatement(updateQuery);
+            preparedStatement.setString(1, emprunt.getDate_retour());
+            preparedStatement.setInt(2, emprunt.getBook_id());
+            preparedStatement.setInt(3, emprunt.getEmprunteur_id());
+
+            preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+    @Override
     public void updateBookInformationByISBN(String isbnToUpdate) {
         // Search for the book by ISBN
         Book foundBook = searchBookByISBN(isbnToUpdate);
@@ -721,49 +643,55 @@ public class Book {
             System.out.println("Aucun livre trouvé avec l'ISBN spécifié.");
         }
     }
+    @Override
+    public Book searchBookByStatus(String statusToSearch) {
 
-    // Getter and Setter for book_id
-    public int getBook_id() {
-        return book_id;
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        try {
+            connection = DatabaseManager.Connection();
+
+            // SQL query to select a book by ISBN
+            String selectQuery = "SELECT * FROM book WHERE etat = ?";
+             preparedStatement = connection.prepareStatement(selectQuery);
+            preparedStatement.setString(1, statusToSearch);
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            if (resultSet.next()) {
+                String isbn = resultSet.getString("isbn");
+                String titre = resultSet.getString("titre");
+                String auteur = resultSet.getString("auteur");
+                String etat = resultSet.getString("etat");
+
+                // Create a new Book object with the retrieved information
+                Book foundBook = new Book();
+                foundBook.setIsbn(isbn);
+                foundBook.setTitre(titre);
+                foundBook.setAuteur(auteur);
+                foundBook.setEtat(etat);
+
+                // Close resources
+                resultSet.close();
+                preparedStatement.close();
+                connection.close();
+
+                return foundBook;
+            } else {
+                System.out.println("Il n'y a aucun livre " + statusToSearch );
+            }
+
+            // Close resources
+            resultSet.close();
+            preparedStatement.close();
+            connection.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return null;
     }
 
-    public void setBook_id(int book_id) {
-        this.book_id = book_id;
-    }
 
-    // Getter and Setter for isbn
-    public int getIsbn() {
-        return isbn;
-    }
 
-    public void setIsbn(int isbn) {
-        this.isbn = isbn;
-    }
-
-    // Getter and Setter for titre
-    public String getTitre() {
-        return titre;
-    }
-
-    public void setTitre(String titre) {
-        this.titre = titre;
-    }
-
-    // Getter and Setter for auteur
-    public String getAuteur() {
-        return auteur;
-    }
-
-    public void setAuteur(String auteur) {
-        this.auteur = auteur;
-    }
-
-    // Getter and Setter for etat
-    public String getEtat() {
-        return etat;
-    }
-
-    public void setEtat(String etat) {
-        this.etat = etat;
-    }
 }
