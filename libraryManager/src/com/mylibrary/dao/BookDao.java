@@ -1,6 +1,6 @@
 package com.mylibrary.dao;
 import com.mylibrary.model.Book;
-
+ import java.util.List;
 public interface BookDao {
     void addBook();
     int searchBookIdByISBN(String isbnToSearch);
@@ -10,7 +10,9 @@ public interface BookDao {
     Book searchBookByAuthor(String authorToSearch);
     Book searchBookByStatus(String statusToSearch);
     void showAllBooks();
-    void borrowBookByISBN(String isbnToBorrow);
+    void showAllAvailableBooks();
+    void  showAllBorrowedBooks();
+     void borrowBookByISBN(String isbnToBorrow);
     void returnBookByISBN(String isbnToReturn);
     void updateBookInformationByISBN(String isbnToUpdate);
     void Menu();

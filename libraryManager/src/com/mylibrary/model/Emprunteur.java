@@ -4,10 +4,10 @@ package com.mylibrary.model;
 public class Emprunteur {
     private int emprunteur_id;
     private String numero_membre;
-    private String motdepasse;
+    private String nom;
 
 
-    // Getters and setters for emprunteur_id, numero_membre, and motdepasse
+    // Getters and setters for emprunteur_id, numero_membre, and nom
     public int getEmprunteur_id() {
         return emprunteur_id;
     }
@@ -24,11 +24,11 @@ public class Emprunteur {
         this.numero_membre = numero_membre;
     }
 
-    public String getMotdepasse() {
-        return motdepasse;
+    public String getNom() {
+        return nom;
     }
 
-    public void setMotdepasse(String motdepasse) {
-        this.motdepasse = motdepasse;
+    public void setNom(String nom) {
+        this.nom = nom;
     }
 }

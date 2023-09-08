@@ -1,15 +1,17 @@
 package com.mylibrary;
+ import com.mylibrary.dao.BookDao;
  import com.mylibrary.model.Book;
 import com.mylibrary.dao.BookImp;
 import com.mylibrary.dao.EmprunteurImp;
-import java.util.Scanner;
+
+  import java.util.List;
+ import java.util.Scanner;
 
 
-// Press Shift twice to open the Search Everywhere dialog and type `show whitespaces`,
-// then press Enter. You can now see whitespace characters in your code.
 public class Main {
     public static void main(String[] args) {
-        Scanner input = new Scanner(System.in);
+
+         Scanner input = new Scanner(System.in);
         System.out.println(
                 "********************Bienvenue à la bibliothèque de Paris !********************");
         System.out.println(
@@ -32,7 +34,6 @@ public class Main {
                     System.out.println("Entrez l'ISBN du livre à emprunter :");
                     String isbnToBorrow = input.next();
                     input.nextLine();
-
                     bookImp.borrowBookByISBN(isbnToBorrow);
                     break;
 
@@ -71,11 +72,9 @@ public class Main {
 
                         // Case
                         case 2:
-                            // Consume the newline character left in the buffer
-                            input.nextLine();
+                             input.nextLine();
 
-                            // Prompt the user to enter the author's name
-                            System.out.println("Entrez le nom de l'auteur à rechercher :");
+                             System.out.println("Entrez le nom de l'auteur à rechercher :");
                             String authorToSearch = input.nextLine(); // Read the author's name
                             Book foundBookByAuthor = bookImp.searchBookByAuthor(authorToSearch);
                             if (foundBookByAuthor != null) {
@@ -92,8 +91,7 @@ public class Main {
                         case 3:
                             input.nextLine();
 
-                            // Prompt the user to enter the book title
-                            System.out.println("Entrez le titre du livre à rechercher :");
+                             System.out.println("Entrez le titre du livre à rechercher :");
                             String titleToSearch = input.nextLine(); // Read the book title
                             Book foundBookByTitle = bookImp.searchBookByTitle(titleToSearch);
                             if (foundBookByTitle != null){
@@ -111,24 +109,25 @@ public class Main {
                     break;
 
                 case 4:
-                    //book.showAllAvailableBooks();
+                    bookImp.showAllAvailableBooks();
                     break;
 
                 case 5:
-                    emprunteur.signup();
+                    emprunteur.enregistrerEmprunteur();
                     break;
 
                 case 6:
-                    //emprunteur.allEmprunteurs();
+                    emprunteur.allEmprunteurs();
                     break;
 
                 case 7:
-                    //book.showAllBorrowedBooks();
+                    bookImp.showAllBorrowedBooks();
+                    break;
                 case 8:
                     System.out.println("Entrez l'ISBN du livre à supprimer :");
                     String isbnToDelete = input.next();
 
-                    // Use the deleteBookByISBN method to delete the book based on ISBN
+                    // deleteBookByISBN method to delete the book based on ISBN
                     bookImp.deleteBookByISBN(isbnToDelete);
                 case 9:
                     System.out.println("Entrez l'ISBN du livre à modifier :");

@@ -3,11 +3,11 @@ package com.mylibrary.dao;
 import java.sql.*;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.Scanner;
 
 import com.mylibrary.model.Book;
 import com.mylibrary.model.Emprunt;
-import com.mylibrary.model.Emprunteur;
 import com.mylibrary.db.DatabaseManager;
 
 public class BookImp implements BookDao {
@@ -19,7 +19,7 @@ public class BookImp implements BookDao {
 
     @Override
     public void addBook() {
-        Scanner input = new Scanner(System.in); // Create a new Scanner for user input
+        Scanner input = new Scanner(System.in);
         System.out.println("Entrez l'ISBN du livre:");
         String isbn = input.next();
         input.nextLine();
@@ -33,14 +33,12 @@ public class BookImp implements BookDao {
         book.setIsbn(isbn);
         book.setTitre(titre);
         book.setAuteur(auteur);
-        String etat = "disponible"; // Set the etat here or retrieve it from user input
+        String etat = "disponible";
 
-        // Use the database connection from the Book class
-        try {
+         try {
             Connection connection = DatabaseManager.Connection();
 
-            // SQL query to insert a book into the table
-            String insertQuery = "INSERT INTO book (isbn, titre, auteur, etat) VALUES (?, ?, ?, ?)";
+             String insertQuery = "INSERT INTO book (isbn, titre, auteur, etat) VALUES (?, ?, ?, ?)";
             PreparedStatement preparedStatement = connection.prepareStatement(insertQuery);
 
             preparedStatement.setString(1, isbn);
@@ -65,30 +63,25 @@ public class BookImp implements BookDao {
         Connection connection = null;
         PreparedStatement preparedStatement = null;
         ResultSet resultSet = null;
-        int bookId = -1; // Initialisez à -1 ou une valeur d'erreur appropriée
+        int bookId = -1;
 
         try {
-            // Établir la connexion à la base de données en utilisant DatabaseManager
-            connection = DatabaseManager.Connection();
+             connection = DatabaseManager.Connection();
 
-            // Requête SQL pour récupérer book_id basé sur ISBN
-            String query = "SELECT book_id FROM book WHERE isbn = ?";
+             String query = "SELECT book_id FROM book WHERE isbn = ?";
             preparedStatement = connection.prepareStatement(query);
             preparedStatement.setString(1, isbnToSearch);
 
-            // Exécutez la requête
-            resultSet = preparedStatement.executeQuery();
+             resultSet = preparedStatement.executeQuery();
 
-            // Vérifiez si un résultat a été trouvé
-            if (resultSet.next()) {
+             if (resultSet.next()) {
                 bookId = resultSet.getInt("book_id");
             }
         } catch (SQLException e) {
-            e.printStackTrace(); // Gérez ou journalisez l'exception selon vos besoins
+            e.printStackTrace();
         } finally {
             try {
-                // Fermer les ressources
-                if (resultSet != null) {
+                 if (resultSet != null) {
                     resultSet.close();
                 }
                 if (preparedStatement != null) {
@@ -98,7 +91,7 @@ public class BookImp implements BookDao {
                     connection.close();
                 }
             } catch (SQLException e) {
-                e.printStackTrace(); // Gérez ou journalisez l'exception selon vos besoins
+                e.printStackTrace();
             }
         }
 
@@ -319,6 +312,73 @@ public class BookImp implements BookDao {
 
                 System.out.println(
                         isbn + "\t\t" + titre + "\t\t" + auteur + "\t\t" + etat);
+            }
+
+            // Close resources
+            resultSet.close();
+            statement.close();
+            connection.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+    @Override
+    public void showAllAvailableBooks(){
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+
+        try {
+            connection = DatabaseManager.Connection();
+
+            // SQL query to select all books from the 'book' table
+            String selectQuery = "SELECT * FROM book WHERE etat='disponible'";
+            Statement statement = connection.createStatement();
+            ResultSet resultSet = statement.executeQuery(selectQuery);
+
+            System.out.println("\t\t\t\tAFFICHER TOUS LES LIVRES DISPONIBLE\n");
+            System.out.println("ISBN\t\tTitre\t\tAuteur\t\tEtat");
+
+            while (resultSet.next()) {
+                int isbn = resultSet.getInt("isbn");
+                String titre = resultSet.getString("titre");
+                String auteur = resultSet.getString("auteur");
+                String etat = resultSet.getString("etat");
+
+                System.out.println(
+                        isbn + "\t\t" + titre + "\t\t" + auteur + "\t\t" + etat);
+            }
+
+            // Close resources
+            resultSet.close();
+            statement.close();
+            connection.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void showAllBorrowedBooks() {
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+
+        try {
+            connection = DatabaseManager.Connection();
+
+             String selectQuery = "SELECT * FROM book WHERE etat='emprunté'";
+            Statement statement = connection.createStatement();
+            ResultSet resultSet = statement.executeQuery(selectQuery);
+
+            System.out.println("\t\t\t\tAFFICHER TOUS LES LIVRES EMPRUNTE\n");
+            System.out.println("ISBN\t\tTitre\t\tAuteur\t\t");
+
+            while (resultSet.next()) {
+                int isbn = resultSet.getInt("isbn");
+                String titre = resultSet.getString("titre");
+                String auteur = resultSet.getString("auteur");
+
+                System.out.println(
+                        isbn + "\t\t" + titre + "\t\t" + auteur + "\t\t" );
             }
 
             // Close resources
