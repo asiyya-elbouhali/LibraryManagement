@@ -1,15 +1,15 @@
 package com.mylibrary;
- import com.mylibrary.dao.BookDao;
- import com.mylibrary.model.Book;
+import com.mylibrary.model.Book;
 import com.mylibrary.dao.BookImp;
 import com.mylibrary.dao.EmprunteurImp;
+import com.mylibrary.dao.Statistics;
 
-  import java.util.List;
- import java.util.Scanner;
+import java.util.Scanner;
 
 
 public class Main {
     public static void main(String[] args) {
+
 
          Scanner input = new Scanner(System.in);
         System.out.println(
@@ -22,6 +22,8 @@ public class Main {
         int searchChoice;
         Book book = new Book();
         BookImp bookImp = new BookImp(book);
+        Statistics statistics= new Statistics();
+        bookImp.updateBookStatusToLostIfReturnDateExceeded();
         EmprunteurImp emprunteur = new EmprunteurImp();
 
         do {
@@ -54,6 +56,7 @@ public class Main {
                     System.out.println(
                             " Appuyez sur 3 pour chercher un livre par Titre.");
                     searchChoice = input.nextInt();
+
                     switch (searchChoice){
                         case 1:
                             System.out.println("Entrez l'ISBN du livre à rechercher :");
@@ -107,11 +110,9 @@ public class Main {
                             break;
                     }
                     break;
-
                 case 4:
                     bookImp.showAllAvailableBooks();
                     break;
-
                 case 5:
                     emprunteur.enregistrerEmprunteur();
                     break;
@@ -127,30 +128,25 @@ public class Main {
                     System.out.println("Entrez l'ISBN du livre à supprimer :");
                     String isbnToDelete = input.next();
 
-                    // deleteBookByISBN method to delete the book based on ISBN
-                    bookImp.deleteBookByISBN(isbnToDelete);
+                     bookImp.deleteBookByISBN(isbnToDelete);
                 case 9:
                     System.out.println("Entrez l'ISBN du livre à modifier :");
                     String isbnToUpdate = input.next();
-                    // Call the method to update book information based on ISBN
-                    bookImp.updateBookInformationByISBN(isbnToUpdate);
+                     bookImp.updateBookInformationByISBN(isbnToUpdate);
                     break;
                 case 10:
                     System.out.println("Entrez l'ISBN du livre à retourner :");
                     String isbnToReturn = input.next();
                     bookImp.returnBookByISBN(isbnToReturn);
                     break;
-
+                case 11:
+                    statistics.displayStatistics();
+                    break;
                 default:
-
-                    // Print statement
-                    System.out.println("Choisissez entre 0 et 7.");
+                     System.out.println("Choisissez entre 0 et 11.");
             }
-
         }
         while (choice != 0);
-
-
 
     }
 }

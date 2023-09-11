@@ -10,6 +10,8 @@ import com.mylibrary.model.Book;
 import com.mylibrary.model.Emprunt;
 import com.mylibrary.db.DatabaseManager;
 
+import javax.xml.crypto.Data;
+
 public class BookImp implements BookDao {
     private Book book;
 
@@ -190,7 +192,6 @@ public class BookImp implements BookDao {
 
         return null;
     }
-
     @Override
     public Book searchBookByTitle(String titleToSearch) {
         Connection connection = null;
@@ -292,17 +293,20 @@ public class BookImp implements BookDao {
     public void showAllBooks() {
         Connection connection = null;
         PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
 
         try {
             connection = DatabaseManager.Connection();
 
             // SQL query to select all books from the 'book' table
             String selectQuery = "SELECT * FROM book";
-            Statement statement = connection.createStatement();
-            ResultSet resultSet = statement.executeQuery(selectQuery);
+            preparedStatement = connection.prepareStatement(selectQuery);
+            resultSet = preparedStatement.executeQuery();
 
-            System.out.println("\t\t\t\tSHOWING ALL BOOKS\n");
-            System.out.println("ISBN\t\tTitre\t\tAuteur\t\tEtat");
+            // Create a table header
+            System.out.println("--------------------------------------------------------------------------------------------");
+            System.out.printf("%-15s%-40s%-30s%-15s%n", "ISBN", "Titre", "Auteur", "Etat");
+            System.out.println("--------------------------------------------------------------------------------------------");
 
             while (resultSet.next()) {
                 int isbn = resultSet.getInt("isbn");
@@ -310,16 +314,27 @@ public class BookImp implements BookDao {
                 String auteur = resultSet.getString("auteur");
                 String etat = resultSet.getString("etat");
 
-                System.out.println(
-                        isbn + "\t\t" + titre + "\t\t" + auteur + "\t\t" + etat);
+                // Display book information in a formatted table
+                System.out.printf("%-15d%-40s%-30s%-15s%n", isbn, titre, auteur, etat);
             }
 
-            // Close resources
-            resultSet.close();
-            statement.close();
-            connection.close();
         } catch (SQLException e) {
             e.printStackTrace();
+        } finally {
+            // Close resources in a try-catch block to ensure they are always closed
+            try {
+                if (resultSet != null) {
+                    resultSet.close();
+                }
+                if (preparedStatement != null) {
+                    preparedStatement.close();
+                }
+                if (connection != null) {
+                    connection.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
     }
     @Override
@@ -409,20 +424,22 @@ public class BookImp implements BookDao {
         System.out.println("Appuyez sur 8 pour supprimer un livre. ");
         System.out.println("Appuyez sur 9 pour modifier un livre. ");
         System.out.println("Appuyez sur 10 pour retourner  un livre.");
-
+        System.out.println("Appuyez sur 11 pour voir les statistiques.");
         System.out.println(
                 "-------------------------------------------------------------------------------------------------------");
     }
 
     @Override
     public void borrowBookByISBN(String isbnToBorrow) {
+        Connection connection=null;
+        PreparedStatement preparedStatement=null;
         // Search for the book by ISBN
         Book foundBook = searchBookByISBN(isbnToBorrow);
 
         if (foundBook != null) {
             if (foundBook.getEtat().equals("disponible")) {
                 // Set the new status to "emprunté"
-                foundBook.setEtat("emprunté");
+               // foundBook.setEtat("emprunté");
 
                 // Update the book's status in the database
                 updateBookStatusInDatabase(foundBook);
@@ -452,15 +469,10 @@ public class BookImp implements BookDao {
                 if (emprunteurId != -1) {
                     emprunt.setEmprunteur_id(emprunteurId);
 
-                    // Get the database connection
-                    String jdbcUrl = "jdbc:mysql://localhost:3306/librarymanager";
-                    String username = "root";
-                    String password = "";
 
-                    Connection connection = null;
+
                     try {
-                        // Establish the database connection
-                        connection = DriverManager.getConnection(jdbcUrl, username, password);
+                         connection = DatabaseManager.Connection();
 
                         // Insert the Emprunt object into the database
                         emprunt.addEmpruntToDatabase(connection);
@@ -483,11 +495,16 @@ public class BookImp implements BookDao {
             } else if (foundBook.getEtat().equals("emprunté")) {
                 System.out.println("Le livre est déjà emprunté.");
             }
-        } else {
+        else if (foundBook.getEtat().equals("perdu")){
+            System.out.println("Ce livre est Perdu.");
+        }else {
             System.out.println("Aucun livre trouvé avec l'ISBN spécifié.");
+
         }
     }
-     private void updateBookStatusInDatabase(Book book) {
+}
+
+    private void updateBookStatusInDatabase(Book book) {
 
 
         Connection connection = null;
@@ -514,55 +531,45 @@ public class BookImp implements BookDao {
         }
     }
     public void returnBookByISBN(String isbnToReturn) {
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+
         // Search for the book by ISBN
         Book foundBook = searchBookByISBN(isbnToReturn);
 
         if (foundBook != null) {
             if (foundBook.getEtat().equals("emprunté")) {
-                // Set the new status to "disponible"
-                foundBook.setEtat("disponible");
-
-                // Update the book's status in the database
-                updateBookStatusInDatabase(foundBook);
-
-                // Get the current date for return date
-                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-                Date currentDate = new Date();
-                String dateRetour = dateFormat.format(currentDate);
-
-                // Set the return date in the Emprunt object
-                Emprunt emprunt = new Emprunt();
-                emprunt.setBook_id(foundBook.getBook_id());
-                emprunt.setDate_retour(dateRetour);
-
-                // Set the emprunteur_id based on the provided numero_member
                 Scanner input = new Scanner(System.in);
                 System.out.println("Entrez le numero_member de l'emprunteur :");
                 String numeroMember = input.nextLine();
+
                 // Call the lookup method to get the emprunteur_id
                 int emprunteurId = lookupEmprunteurIdByNumeroMember(numeroMember);
 
                 if (emprunteurId != -1) {
-                    emprunt.setEmprunteur_id(emprunteurId);
-
-                    // Get the database connection
-                    String jdbcUrl = "jdbc:mysql://localhost:3306/librarymanager";
-                    String username = "root";
-                    String password = "";
-
-                    Connection connection = null;
                     try {
-                        // Establish the database connection
-                        connection = DriverManager.getConnection(jdbcUrl, username, password);
+                        connection = DatabaseManager.Connection();
 
-                        // Update the return date in the Emprunt object in the database
-                        updateEmpruntReturnDateInDatabase(emprunt, connection);
+                        // SQL query to delete the emprunt by book_id and emprunteur_id
+                        String deleteEmprunt = "DELETE FROM emprunt WHERE book_id = ? AND emprunteur_id = ?";
+                        preparedStatement = connection.prepareStatement(deleteEmprunt);
+                        preparedStatement.setInt(1, foundBook.getBook_id());
+                        preparedStatement.setInt(2, emprunteurId);
+                        int rowsDeleted = preparedStatement.executeUpdate();
+                        if (rowsDeleted > 0) {
+                            // Mettez à jour l'état du livre dans la base de données
 
-                        System.out.println("Livre retourné avec succès.");
+                            System.out.println("Livre retourné avec succès.");
+                        } else {
+                            System.out.println("Aucun emprunt trouvé pour le livre et l'emprunteur spécifiés.");
+                        }
                     } catch (SQLException e) {
                         e.printStackTrace();
                     } finally {
                         try {
+                            if (preparedStatement != null) {
+                                preparedStatement.close();
+                            }
                             if (connection != null) {
                                 connection.close();
                             }
@@ -627,22 +634,11 @@ public class BookImp implements BookDao {
         return emprunteurId;
     }
 
-    private void updateEmpruntReturnDateInDatabase(Emprunt emprunt, Connection connection) {
-        try {
-            // Update the return date in the Emprunt object
-            String updateQuery = "UPDATE emprunt SET date_retour = ? WHERE book_id = ? AND emprunteur_id = ?";
-            PreparedStatement preparedStatement = connection.prepareStatement(updateQuery);
-            preparedStatement.setString(1, emprunt.getDate_retour());
-            preparedStatement.setInt(2, emprunt.getBook_id());
-            preparedStatement.setInt(3, emprunt.getEmprunteur_id());
-
-            preparedStatement.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-    @Override
+     @Override
     public void updateBookInformationByISBN(String isbnToUpdate) {
+
+        Connection connection=null;
+        PreparedStatement preparedStatement= null;
         // Search for the book by ISBN
         Book foundBook = searchBookByISBN(isbnToUpdate);
 
@@ -678,14 +674,11 @@ public class BookImp implements BookDao {
                 newAuthor = input.nextLine();
             }
 
-            // Update the book in the database
-            String jdbcUrl = "jdbc:mysql://localhost:3306/librarymanager";
-            String username = "root";
-            String password = "";
+            try {
+                connection = DatabaseManager.Connection();
 
-            try (Connection connection = DriverManager.getConnection(jdbcUrl, username, password)) {
                 String updateQuery = "UPDATE book SET titre = ?, auteur = ? WHERE isbn = ?";
-                PreparedStatement preparedStatement = connection.prepareStatement(updateQuery);
+                preparedStatement = connection.prepareStatement(updateQuery);
                 preparedStatement.setString(1, newTitle);
                 preparedStatement.setString(2, newAuthor);
                 preparedStatement.setString(3, isbnToUpdate);
@@ -751,7 +744,46 @@ public class BookImp implements BookDao {
 
         return null;
     }
+    public void updateBookStatusToLostIfReturnDateExceeded() {
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
 
+        try {
+            connection = DatabaseManager.Connection();
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+            Date currentDate = new Date();
+            String currentDateString = dateFormat.format(currentDate);
 
+            // Requête SQL pour mettre à jour l'état des livres en "perdu" si la date de retour est dépassée
+            String updateQuery = "UPDATE book AS b " +
+                    "INNER JOIN emprunt AS e ON b.book_id = e.book_id " +
+                    "SET b.etat = 'perdu' " +
+                    "WHERE e.date_retour < ?";
+
+            preparedStatement = connection.prepareStatement(updateQuery);
+            preparedStatement.setString(1, currentDateString);
+
+            int rowsUpdated = preparedStatement.executeUpdate();
+
+            if (rowsUpdated > 0) {
+                System.out.println(rowsUpdated + " livres ont été mis à jour en 'perdu' car leur date de retour était dépassée.");
+            } else {
+                System.out.println("Aucun livre mis à jour en 'perdu'.");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (preparedStatement != null) {
+                    preparedStatement.close();
+                }
+                if (connection != null) {
+                    connection.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
 
 }

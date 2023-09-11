@@ -42,4 +42,31 @@ public class EmpruntImp implements EmpruntDao {
             }
         }
     }
+
+    public void deleteEmpruntToDatabase(int emprunt_id){
+
+        Connection connection = null;
+        PreparedStatement insertStatement = null;
+
+        try {
+            connection = DatabaseManager.Connection();
+            String deleteQuery = "DELETE FROM emprunt WHERE emprunt_id=?";
+            insertStatement = connection.prepareStatement(deleteQuery);
+            insertStatement.setInt(1,emprunt_id);
+            insertStatement.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (insertStatement != null) {
+                    insertStatement.close();
+                }
+                if (connection != null) {
+                    connection.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
 }
