@@ -1,6 +1,8 @@
 package com.mylibrary.dao;
 
 import com.mylibrary.db.DatabaseManager;
+import com.mylibrary.model.Book;
+import com.mylibrary.model.Emprunteur;
 
 import javax.xml.crypto.Data;
 import java.sql.*;
@@ -14,16 +16,18 @@ public class EmprunteurImp implements EmprunteurDao {
 
     @Override
     public void enregistrerEmprunteur() {
+        Emprunteur emprunteur= new Emprunteur();
         Scanner input = new Scanner(System.in);
         System.out.println("Entez votre numero_membre:");
-        this.numero_membre = input.nextLine();
+        String numero_membre = input.nextLine();
 
         System.out.println("Entez votre nom:");
-        this.nom = input.nextLine();
+        String nom = input.nextLine();
 
-        System.out.println("Signup successful!");
+        emprunteur.setNumero_membre(numero_membre);
+        emprunteur.setNom(nom);
 
-        input.close();
+
 
         try {
             Connection connection = DatabaseManager.Connection();
@@ -31,8 +35,8 @@ public class EmprunteurImp implements EmprunteurDao {
             String insertQuery = "INSERT INTO emprunteur (numero_membre, nom) VALUES (?, ?)";
             PreparedStatement preparedStatement = connection.prepareStatement(insertQuery);
 
-            preparedStatement.setString(1, this.numero_membre);
-            preparedStatement.setString(2, this.nom);
+            preparedStatement.setString(1, numero_membre);
+            preparedStatement.setString(2, nom);
 
             int rowsInserted = preparedStatement.executeUpdate();
             if (rowsInserted > 0) {

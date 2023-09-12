@@ -129,6 +129,7 @@ public class Main {
                     String isbnToDelete = input.next();
 
                      bookImp.deleteBookByISBN(isbnToDelete);
+                     break;
                 case 9:
                     System.out.println("Entrez l'ISBN du livre à modifier :");
                     String isbnToUpdate = input.next();
