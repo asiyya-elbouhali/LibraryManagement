@@ -43,8 +43,7 @@ public class EmprunteurImp implements EmprunteurDao {
                 System.out.println("Emprunteur added to the database successfully.");
             }
 
-            // Close resources
-            preparedStatement.close();
+             preparedStatement.close();
             connection.close();
         } catch (SQLException e) {
             e.printStackTrace();

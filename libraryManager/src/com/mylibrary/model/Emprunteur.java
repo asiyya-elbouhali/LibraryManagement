@@ -7,8 +7,7 @@ public class Emprunteur {
     private String nom;
 
 
-    // Getters and setters for emprunteur_id, numero_membre, and nom
-    public int getEmprunteur_id() {
+     public int getEmprunteur_id() {
         return emprunteur_id;
     }
 

@@ -15,8 +15,7 @@ public class Statistics {
         try {
             connection = DatabaseManager.Connection();
 
-            // Requête SQL pour obtenir des statistiques sur la bibliothèque
-            String statisticsQuery = "SELECT " +
+             String statisticsQuery = "SELECT " +
                     "(SELECT COUNT(*) FROM book) AS total_books, " +
                     "(SELECT COUNT(*) FROM emprunt) AS total_emprunts, " +
                     "(SELECT COUNT(*) FROM book WHERE etat = 'perdu') AS booksLosts, " +

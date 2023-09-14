@@ -3,7 +3,7 @@ package com.mylibrary.dao;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import com.mylibrary.model.Emprunt; // Import the Emprunt class
+import com.mylibrary.model.Emprunt;
 import com.mylibrary.db.DatabaseManager;
 
 public class EmpruntImp implements EmpruntDao {

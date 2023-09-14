@@ -48,8 +48,7 @@ public class Main {
                     break;
 
                 case 3:
-                    //Search
-                    System.out.println(
+                     System.out.println(
                             " Appuyez sur  1 pour chercher un livre par ISBN.");
                     System.out.println(
                             " Appuyez sur 2 pour chercher un livre par Auteur.");
@@ -73,12 +72,11 @@ public class Main {
                             }
                             break;
 
-                        // Case
-                        case 2:
+                         case 2:
                              input.nextLine();
 
                              System.out.println("Entrez le nom de l'auteur à rechercher :");
-                            String authorToSearch = input.nextLine(); // Read the author's name
+                            String authorToSearch = input.nextLine();
                             Book foundBookByAuthor = bookImp.searchBookByAuthor(authorToSearch);
                             if (foundBookByAuthor != null) {
                                 System.out.println("Livre trouvé :");
@@ -90,15 +88,13 @@ public class Main {
                                 System.out.println("Livre non trouvé.");
                             }
                             break;
-                        // Case
                         case 3:
                             input.nextLine();
 
                              System.out.println("Entrez le titre du livre à rechercher :");
-                            String titleToSearch = input.nextLine(); // Read the book title
+                            String titleToSearch = input.nextLine();
                             Book foundBookByTitle = bookImp.searchBookByTitle(titleToSearch);
                             if (foundBookByTitle != null){
-
                                 System.out.println("Livre trouvé :");
                                 System.out.println("ISBN : " + foundBookByTitle.getIsbn());
                                 System.out.println("Titre : " + foundBookByTitle.getTitre());
@@ -148,6 +144,5 @@ public class Main {
             }
         }
         while (choice != 0);
-
     }
 }

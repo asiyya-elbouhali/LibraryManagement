@@ -9,8 +9,7 @@ public class Book {
 
 
 
-    // Getter and Setter for book_id
-    public int getBook_id() {
+     public int getBook_id() {
         return book_id;
     }
 
@@ -18,8 +17,7 @@ public class Book {
         this.book_id = book_id;
     }
 
-    // Getter and Setter for isbn
-    public String getIsbn() {
+     public String getIsbn() {
         return isbn;
     }
 
@@ -27,8 +25,7 @@ public class Book {
         this.isbn = isbn;
     }
 
-    // Getter and Setter for titre
-    public String getTitre() {
+     public String getTitre() {
         return titre;
     }
 
@@ -36,8 +33,7 @@ public class Book {
         this.titre = titre;
     }
 
-    // Getter and Setter for auteur
-    public String getAuteur() {
+     public String getAuteur() {
         return auteur;
     }
 
@@ -45,8 +41,7 @@ public class Book {
         this.auteur = auteur;
     }
 
-    // Getter and Setter for etat
-    public String getEtat() {
+     public String getEtat() {
         return etat;
     }
 

@@ -13,8 +13,7 @@ public class Emprunt {
 
 
     public Emprunt() {
-        //le constructeur
-     }
+      }
 
     public Emprunt(int emprunteur_id, int book_id, String date_emprunt, String date_retour) {
         this.emprunteur_id = emprunteur_id;
@@ -22,6 +21,7 @@ public class Emprunt {
         this.date_emprunt = date_emprunt;
         this.date_retour = date_retour;
     }
+
 
     public int getEmprunt_id() {
         return emprunt_id;
